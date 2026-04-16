@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..900;1,200..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @import "tailwindcss";
 
@@ -9,7 +9,7 @@
   --color-accent: #FFF8E7; /* Cream */
   --color-accent-dark: #F0E6D2;
 
-  --font-heading: 'Playfair Display', serif;
+  --font-heading: 'Mulish', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -36,5 +36,14 @@ html {
 .text-gradient-gold {
   background: linear-gradient(to right, #D4AF37, #B8860B);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
