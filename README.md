@@ -1,87 +1,81 @@
 # P.K. Ganesh Textile - Premium Wholesale Platform
 
-A sophisticated, boutique-grade e-commerce platform designed for the wholesale textile industry. Featuring a dynamic product catalog, a real-time admin inventory command center, and a robust PostgreSQL-backed architecture.
+This guide will help you set up and run the P.K. Ganesh Textile platform on a new device from scratch.
 
-## 🚀 Quick Start Guide
+---
 
-### 1. Prerequisites
-Ensure you have the following installed on your machine:
-*   **Node.js** (v18 or higher)
-*   **PostgreSQL** (v14 or higher)
-*   **Git**
+## 🛠️ Step 1: Prepare Your Machine
+Before starting, ensure you have these 3 things installed:
+1.  **Node.js**: [Download here](https://nodejs.org/) (Version 18+)
+2.  **PostgreSQL**: [Download here](https://www.postgresql.org/)
+3.  **Git**: [Download here](https://git-scm.com/)
 
-### 2. Installation
-Clone the repository and install dependencies for both the frontend and the backend:
+---
 
-```bash
-# Clone the repository
+## 📂 Step 2: Get the Code
+Open your terminal (PowerShell or CMD) and run:
+```powershell
+# 1. Clone the repository
 git clone https://github.com/Sudharsan0727/Pk-Ganesh-Textile.git
+
+# 2. Enter the folder
 cd Pk-Ganesh-Textile
 
-# Install Frontend dependencies
+# 3. Install main project tools
 npm install
-
-# Install Backend dependencies
-cd server
-npm install
-cd ..
 ```
 
-### 3. Database Setup (PostgreSQL)
-1.  Create a new database in PostgreSQL named `textile_db`.
-2.  Create a `.env` file in the `server` directory and add your connection string:
+---
+
+## 🏗️ Step 3: Setup the Database
+1.  **Open PostgreSQL** (pgAdmin or terminal) and create a new database named: `textile_db`
+2.  **Create an Environment File**:
+    *   Go into the `server` folder.
+    *   Create a new file named `.env`
+    *   Paste this inside (replace `password` with your PostgreSQL password):
     ```env
-    DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/textile_db?schema=public"
-    JWT_SECRET="your_secure_secret_key"
+    DATABASE_URL="postgresql://postgres:password@localhost:5432/textile_db?schema=public"
+    JWT_SECRET="pk_ganesh_secret_key"
     ```
-3.  Apply the database schema and generate the Prisma Client:
-    ```bash
+3.  **Install Server Tools**:
+    ```powershell
     cd server
+    npm install
+    ```
+4.  **Build the Database Structure**:
+    ```powershell
     npx prisma migrate dev --name init
     npx prisma generate
-    cd ..
     ```
 
 ---
 
-## 💾 Database Import / Export
-
-This platform includes custom tools to move your inventory between devices easily.
-
-### How to Export (Backup)
-Saves your entire inventory (Categories + Products) to a timestamped JSON file.
-```bash
-node server/export-db.js
-```
-
-### How to Import (Restore)
-Restores your inventory on a new machine from a backup file.
-```bash
-node server/import-db.js db_backup_FILENAME.json
-```
+## 💾 Step 4: Import Your Backup Data
+If you have a backup file (like `db_backup_...json`), follow these steps:
+1.  Place the backup file in the main `Pk-Ganesh-Textile` folder.
+2.  Run this command (replace `FILENAME` with your actual file name):
+    ```powershell
+    node server/import-db.js FILENAME.json
+    ```
+    *Example: node server/import-db.js db_backup_2026-05-09.json*
 
 ---
 
-## 🛠️ Development & Production
-
-### Run the Development Stack
-Starts the React frontend, Node.js server, and image watcher concurrently.
-```bash
+## 🚀 Step 5: Run the Platform
+Now you are ready! Run this command from the **main folder**:
+```powershell
 npm run dev
 ```
-
-### Build for Production
-Compiles the application into a highly optimized production bundle.
-```bash
-npm run build
-```
+*   **Storefront**: http://localhost:5173
+*   **Admin Panel**: http://localhost:5173/admin
+*   **Backend API**: http://localhost:5000
 
 ---
 
-## ✨ Features
-*   **Dynamic Catalog**: Automated product filtering and category-based navigation.
-*   **Masterpiece Narratives**: AI-enhanced product descriptions for a premium feel.
-*   **Admin Console**: Real-time stats dashboard and intelligent inventory search.
-*   **Image Management**: Automated WebP conversion for maximum performance.
+## 📝 Maintenance Commands
+*   **Create a new Backup**: `node server/export-db.js`
+*   **Build for Production**: `npm run build`
+*   **Clear Database**: `npx prisma migrate reset` (⚠️ Warning: This deletes everything!)
 
-Developed with ❤️ for **P.K. Ganesh Tex**.
+---
+Developed for **P.K. Ganesh Tex**.
