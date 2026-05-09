@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   MessageCircle, 
   MapPin, 
@@ -11,45 +11,69 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
   Truck,
   Shield,
   Tag,
   Award
 } from 'lucide-react';
-import logoImg from '../assets/pklogo1.png';
 import { products, categories } from '../data/products';
-import slideImage1 from '../assets/Sarees/1.jpg';
-import slideImage2 from '../assets/Sarees/2.png';
-import slideImage3 from '../assets/fabric_rolls_1776340931844.png';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import PromoPopup from '../components/PromoPopup';
+import slideImage1 from '../assets/Pattu Sarees/Pattu Sarees_1.webp';
+import slideImage2 from '../assets/Shirt_Collection_Banner.webp';
+import slideImage3 from '../assets/Banarasi Sarees/Banarasi Sarees_1.webp';
+import slideImage4 from '../assets/Baby Gift Items/Baby Gift Items_1.webp';
+import brand1 from '../assets/clients/ramraj_logo.avif';
+import brand2 from '../assets/clients/NANDU-BRAND.avif';
+import brand3 from '../assets/clients/Alaya_logo.webp';
+import brand4 from '../assets/clients/uathaya.webp';
+import brand5 from '../assets/clients/Raymond.webp';
+import brand6 from '../assets/clients/siyarams-logo.webp';
 
 const phoneNumber = "918072572195";
 
 const heroSlides = [
   {
-    id: 1,
     image: slideImage1,
-    subtitle: "Wholesale Textile Traders",
-    title: "Premium Textile \nCollections in Madurai",
-    desc: "Trusted Quality Fabrics. Wholesale & Retail for over a decade. Experience the finest traditions woven into every thread."
+    subtitle: "PREMIUM TRADITION",
+    title: "Exquisite Pattu \n& Silk Collections",
+    desc: "Direct wholesale of premium Kanchipuram and Art Silks for weddings and festivals.",
+    cta: "View Sarees"
   },
   {
-    id: 2,
     image: slideImage2,
-    subtitle: "Authentic Silk Sarees",
-    title: "Elegance of \nKanchipuram Silks",
-    desc: "Discover our breathtaking array of handwoven silk sarees. Perfect for weddings, festivals, and grand occasions."
+    subtitle: "MODERN SELECTIONS",
+    title: "Premium Shirt \nCollections",
+    desc: "Neatly tailored, high-quality shirts in a wide variety of colors and fabrics. Perfect for wholesale retail showrooms.",
+    cta: "Explore Shirts"
   },
   {
-    id: 3,
     image: slideImage3,
-    subtitle: "Premium Fabrics",
-    title: "Quality Rolls \n& Custom Textiles",
-    desc: "A wide variety of fabric rolls for every need. Bulk orders and custom designs available."
+    subtitle: "ROYAL ELEGANCE",
+    title: "Exquisite Banarasi \nSaree Category",
+    desc: "Timeless Banarasi weaves with intricate zari work, perfect for bridal and festive wear.",
+    cta: "Explore Banarasi"
+  },
+  {
+    image: slideImage4,
+    subtitle: "NEWBORN GIFTS",
+    title: "Premium Baby \nGift Combo Kits",
+    desc: "Beautifully packaged dress kits and essential items for newborn gifting.",
+    cta: "View Baby Kits"
   }
 ];
 
 
-const brands = ["Ramraj Cotton", "Nandu", "Alaya Cotton", "Uathayam", "Raymond", "Siyaram"];
+const brands = [
+  { name: "Ramraj Cotton", logo: brand1 },
+  { name: "Nandu", logo: brand2 },
+  { name: "Alaya Cotton", logo: brand3 },
+  { name: "Uathayam", logo: brand4 },
+  { name: "Raymond", logo: brand5 },
+  { name: "Siyaram", logo: brand6 }
+];
 
 const features = [
   "Trusted Wholesale Dealer in Madurai",
@@ -60,36 +84,51 @@ const features = [
 
 function Home() {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState('All');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [fetchedCategories, setFetchedCategories] = useState([]);
+  const [fetchedProducts, setFetchedProducts] = useState([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    // Handle scrolling to sections if hash is present
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.replace('#', '');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+
+    // Fetch live categories from backend
+    fetch('http://localhost:5000/api/categories')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setFetchedCategories(data);
+          // Only set active tab if not already interacting
+          if (activeTab === 'All') setActiveTab(data[0].name);
+        }
+      })
+      .catch(err => console.error("Failed to fetch categories:", err));
+
+    // Fetch live products from backend
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setFetchedProducts(data);
+      })
+      .catch(err => console.error("Failed to fetch products:", err));
   }, []);
 
-  useEffect(() => {
-    const scrollContainer = document.getElementById('category-scroll');
-    if (!scrollContainer) return;
-
-    const autoScroll = setInterval(() => {
-      const scrollAmount = window.innerWidth > 768 ? 160 : 100;
-      if (scrollContainer.scrollLeft + scrollContainer.offsetWidth >= scrollContainer.scrollWidth - 50) {
-        scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }, 4000);
-
-    return () => clearInterval(autoScroll);
-  }, []);
+  const displayCategories = fetchedCategories.length > 0 ? fetchedCategories : categories;
+  const displayProducts = fetchedProducts.length > 0 ? fetchedProducts : products;
 
   const filteredProducts = activeTab === "All" 
-    ? products 
-    : products.filter(p => p.category === activeTab);
+    ? displayProducts 
+    : displayProducts.filter(p => {
+        const catName = typeof p.category === 'object' ? p.category?.name : p.category;
+        return catName === activeTab;
+      });
 
   const openWhatsApp = (productName = "") => {
     const message = productName 
@@ -103,91 +142,51 @@ function Home() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
+  // Helper to safely get image
+  const getImageUrl = (img) => img || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&h=200&fit=crop';
+
   return (
     <div className="font-body text-slate-800 bg-accent min-h-screen relative">
-      
-      {/* Top Announcement Bar */}
-      <div className="bg-primary text-white text-center py-2 text-[9px] md:text-xs font-bold font-heading tracking-[0.1em] uppercase relative z-[60]">
-        Shipping All Over India from Tamil Nadu | Shop Now
-      </div>
-
-      {/* Navbar */}
-      <nav className="sticky top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex-shrink-0 flex items-center gap-3">
-              <img src={logoImg} alt="P.K. Ganesh Tex Logo" className="h-12 md:h-18 w-auto object-contain" />
-            </div>
-            
-            <div className="hidden md:flex gap-8 items-center">
-              <a href="#about" className="font-bold text-sm text-slate-700 hover:text-primary transition-colors uppercase tracking-wider">About</a>
-              <a href="#categories" className="font-bold text-sm text-slate-700 hover:text-primary transition-colors uppercase tracking-wider">Collections</a>
-              <a href="#products" className="font-bold text-sm text-slate-700 hover:text-primary transition-colors uppercase tracking-wider">Shop</a>
-              <a href="#contact" className="font-bold text-sm text-slate-700 hover:text-primary transition-colors uppercase tracking-wider">Contact</a>
-            </div>
-
-            <div className="md:hidden flex items-center">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-800">
-                {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute w-full bg-white border-b border-secondary shadow-lg">
-            <div className="px-4 pt-2 pb-6 space-y-2 flex flex-col items-center">
-              <a href="#about" onClick={() => setIsMenuOpen(false)} className="block py-3 font-medium text-lg w-full text-center hover:text-primary">About</a>
-              <a href="#categories" onClick={() => setIsMenuOpen(false)} className="block py-3 font-medium text-lg w-full text-center hover:text-primary">Collections</a>
-              <a href="#products" onClick={() => setIsMenuOpen(false)} className="block py-3 font-medium text-lg w-full text-center hover:text-primary">Shop</a>
-              <a href="#contact" onClick={() => setIsMenuOpen(false)} className="block py-3 font-medium text-lg w-full text-center hover:text-primary">Contact</a>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar />
+      <PromoPopup />
 
       {/* Circular Categories Header - FULL WIDTH */}
-      <div className="bg-white py-4 md:py-6 border-b border-slate-100 relative shadow-sm z-40 overflow-hidden w-full">
-        <div className="w-full overflow-hidden relative group">
+      <div className="bg-white border-b border-slate-100 overflow-hidden w-full transition-all duration-300">
+        <div className="w-full overflow-hidden relative group max-w-7xl mx-auto px-4 py-4 md:py-6">
            <div 
              id="category-scroll"
-             className="flex gap-6 md:gap-14 overflow-x-auto no-scrollbar scroll-smooth px-8 lg:px-12"
+             className="flex gap-8 md:gap-14 overflow-x-auto no-scrollbar scroll-smooth"
            >
-             {categories.map((cat, i) => (
+             {displayCategories.map((cat, i) => (
                <motion.div 
-                 key={cat.id} 
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
+                 key={cat.id || i} 
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: i * 0.05 }}
-                 className="flex flex-col items-center gap-3 shrink-0 cursor-pointer group/item" 
-                 onClick={() => { 
-                   setActiveTab(cat.name); 
-                   document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); 
-                 }}
+                 className="flex flex-col items-center gap-3 shrink-0 cursor-pointer group" 
+                 onClick={() => navigate(`/collections/${cat.slug || cat.name.toLowerCase()}`)} 
                >
-                 <div className="w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden border border-slate-200 p-0.5 group-hover/item:border-secondary transition-all transform group-hover/item:scale-105 bg-slate-50">
-                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-full" />
+                 <div className="w-14 h-14 md:w-20 md:h-20 rounded-full overflow-hidden border border-slate-200 p-0.5 group-hover:border-primary transition-all transform group-hover:scale-105 bg-slate-50 shadow-sm">
+                   <img src={getImageUrl(cat.image)} alt={cat.name} loading="lazy" className="w-full h-full object-cover rounded-full" />
                  </div>
-                 <span className="text-[9px] md:text-[10px] font-bold text-slate-800 text-center max-w-[70px] md:max-w-[110px] leading-tight uppercase tracking-tight group-hover/item:text-secondary transition-colors">
+                 <span className="text-[9px] md:text-[10px] font-bold text-slate-600 group-hover:text-primary transition-colors uppercase tracking-tight">
                    {cat.name}
                  </span>
                </motion.div>
              ))}
            </div>
            
-           {/* Navigation Buttons for Horizontal Scroll */}
            <button 
-             onClick={() => document.getElementById('category-scroll').scrollLeft -= 200}
-             className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 shadow-lg p-2 rounded-full text-slate-400 hover:text-primary md:flex hidden z-10 border border-slate-100"
+             onClick={() => document.getElementById('category-scroll').scrollLeft -= 250}
+             className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 shadow-lg p-2 rounded-full text-slate-400 hover:text-primary md:flex hidden z-10 border border-slate-100"
            >
-             <ChevronLeft size={20} />
+             <ChevronLeft size={18} />
            </button>
            <button 
-             onClick={() => document.getElementById('category-scroll').scrollLeft += 200}
-             className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 shadow-lg p-2 rounded-full text-slate-400 hover:text-primary md:flex hidden z-10 border border-slate-100"
+             onClick={() => document.getElementById('category-scroll').scrollLeft += 250}
+             className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 shadow-lg p-2 rounded-full text-slate-400 hover:text-primary md:flex hidden z-10 border border-slate-100"
            >
-             <ChevronRight size={20} />
+             <ChevronRight size={18} />
            </button>
         </div>
       </div>
@@ -209,6 +208,7 @@ function Home() {
             <motion.img 
               src={heroSlides[currentSlide].image} 
               alt="Background" 
+              fetchpriority="high"
               initial={{ scale: 1.15 }}
               animate={{ scale: 1 }}
               transition={{ duration: 7, ease: "easeOut" }}
@@ -237,15 +237,15 @@ function Home() {
               <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl font-bold font-heading leading-snug mb-6 text-white drop-shadow-xl whitespace-pre-line">
                 {heroSlides[currentSlide].title}
               </motion.h1>
-              <motion.p variants={fadeInUp} className="text-base md:text-lg text-gray-200 mb-10 max-w-2xl font-light leading-relaxed">
+              <motion.p variants={fadeInUp} className="text-base md:text-lg text-gray-200 mb-10 max-w-2xl font-light leading-relaxed hidden md:block">
                 {heroSlides[currentSlide].desc}
               </motion.p>
-              <motion.div variants={fadeInUp} className="flex flex-row justify-center md:justify-start gap-2 md:gap-4 mb-10 md:mb-0 w-full px-2 md:px-0">
-                <a href="#categories" className="bg-secondary hover:bg-yellow-600 text-slate-900 px-3 md:px-8 py-3.5 rounded-full font-semibold transition-all shadow-lg text-[11px] sm:text-xs md:text-base text-center flex-1 md:flex-none flex items-center justify-center">
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-center md:justify-start gap-3 md:gap-4 mb-10 md:mb-0 w-full max-w-md md:max-w-none px-4 md:px-0">
+                <a href="#categories" className="bg-secondary hover:bg-yellow-600 text-slate-900 px-8 py-4 rounded-full font-bold transition-all shadow-lg text-sm md:text-base text-center flex items-center justify-center">
                   Browse Collection
                 </a>
-                <button onClick={() => openWhatsApp()} className="bg-[#25D366] hover:bg-[#1ebd59] text-white px-3 md:px-8 py-3.5 rounded-full font-semibold transition-all shadow-lg text-[11px] sm:text-xs md:text-base flex items-center justify-center gap-1 md:gap-2 flex-1 md:flex-none">
-                  <MessageCircle size={16} className="md:w-[22px] md:h-[22px]" /> Order via WhatsApp
+                <button onClick={() => openWhatsApp()} className="bg-[#25D366] hover:bg-[#1ebd59] text-white px-8 py-4 rounded-full font-bold transition-all shadow-lg text-sm md:text-base flex items-center justify-center gap-2">
+                  <MessageCircle size={20} className="md:w-[22px] md:h-[22px]" /> Order via WhatsApp
                 </button>
               </motion.div>
             </motion.div>
@@ -270,15 +270,22 @@ function Home() {
       {/* Recent Collection Section */}
       <section className="py-12 bg-white relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-4">
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="text-left"
             >
-              <h2 className="font-heading text-secondary font-bold tracking-widest uppercase mb-2 text-xs md:text-sm">New Arrivals</h2>
-              <p className="text-4xl md:text-4xl font-heading font-semibold text-primary">Recent Collection</p>
+              <span className="text-secondary font-bold tracking-[0.4em] uppercase text-[10px] mb-4 block">New Arrivals</span>
+              <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary leading-tight relative inline-block">
+                Recent <span className="text-secondary italic relative">
+                  Collection
+                  <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[90%] h-6 text-primary/20" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M0,20 Q50,0 100,20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </h2>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 30 }}
@@ -291,8 +298,8 @@ function Home() {
             </motion.div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-5">
-            {products.slice(0, 6).map((product, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-10">
+            {displayProducts.slice(0, 6).map((product, i) => (
               <motion.div 
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -302,7 +309,7 @@ function Home() {
                 className="group cursor-pointer flex flex-col items-center text-center"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
-                <div className="relative overflow-hidden rounded-xl w-full aspect-square mb-3 shadow-sm border border-slate-100 group-hover:shadow-md transition-all">
+                <div className="relative overflow-hidden rounded-xl w-full aspect-square mb-5 shadow-sm border border-slate-100 group-hover:shadow-md transition-all">
                   <img 
                     src={product.image} 
                     alt={product.name} 
@@ -318,7 +325,9 @@ function Home() {
                     New
                   </div>
                 </div>
-                <p className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-1">{product.category}</p>
+                <p className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-1">
+                  {typeof product.category === 'object' ? product.category?.name : product.category}
+                </p>
                 <h3 className="text-xs md:text-sm font-heading font-bold text-slate-900 mb-1 line-clamp-1 px-1">{product.name}</h3>
                 <div className="text-xs font-bold text-primary">{product.price}</div>
               </motion.div>
@@ -366,38 +375,52 @@ function Home() {
 
       {/* Categories Section */}
       <section id="categories" className="py-24 bg-white relative z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-12">
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-heading font-bold text-primary mb-4">Shop by Category</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">Explore our extensive range of premium textiles sorted exactly to your needs.</p>
+            <span className="text-secondary font-bold tracking-[0.4em] uppercase text-[10px] mb-4 block">The Collections</span>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary leading-tight relative inline-block">
+               Shop by <span className="text-secondary italic relative">
+                 Category
+                 <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[90%] h-6 text-primary/20" viewBox="0 0 100 20" preserveAspectRatio="none">
+                   <path d="M0,20 Q50,0 100,20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                 </svg>
+               </span>
+            </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((cat, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+            {displayCategories.map((cat, i) => (
               <motion.div 
-                key={cat.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={cat.id || i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer aspect-square"
-                onClick={() => {
-                   setActiveTab(cat.name);
-                   document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-                }}
+                transition={{ duration: 0.5, delay: i * 0.05 }}
+                className="group cursor-pointer text-center"
+                onClick={() => navigate(`/collections/${cat.slug || cat.name.toLowerCase()}`)}
               >
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10 duration-300"></div>
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                />
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-8">
-                  <h3 className="text-2xl font-heading font-semibold text-white drop-shadow-md text-center px-4">{cat.name}</h3>
-                  <div className="w-12 h-1 bg-secondary mt-3 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                <div className="relative mx-auto w-full aspect-square max-w-[240px] mb-4">
+                  {/* Decorative Outer Circle */}
+                  <div className="absolute inset-[-10px] border border-slate-100 rounded-full group-hover:inset-[-15px] group-hover:border-primary/30 transition-all duration-500"></div>
+                  
+                  <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white shadow-xl shadow-slate-200/50">
+                    <img 
+                      src={getImageUrl(cat.image)} 
+                      alt={cat.name} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                </div>
+                
+                <h3 className="text-xl md:text-2xl font-heading font-bold text-slate-900 mb-1.5 group-hover:text-primary transition-colors tracking-tight">
+                  {cat.name}
+                </h3>
+                <div className="inline-flex items-center gap-1.5 py-1.5 px-4 bg-slate-50 rounded-full group-hover:bg-primary/10 transition-colors">
+                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary">View Collection</span>
                 </div>
               </motion.div>
             ))}
@@ -409,19 +432,22 @@ function Home() {
       <section id="products" className="py-24 bg-accent relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-heading font-bold text-primary mb-4">Our Premium Collection</h2>
+            <span className="text-secondary font-bold tracking-[0.4em] uppercase text-[10px] mb-4 block">Our Favorites</span>
+            <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary leading-tight relative inline-block">
+              Most <span className="text-secondary italic relative">
+                Popular
+                <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[90%] h-6 text-primary/20" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <path d="M0,20 Q50,0 100,20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </span>
+            </h2>
             
             {/* Filter Tabs */}
             <div className="flex flex-wrap justify-center gap-2 mt-6 md:mt-8 px-1 md:px-0">
-              <button 
-                onClick={() => setActiveTab("All")}
-                className={`px-4 py-1.5 md:py-2 rounded-full font-medium transition-all text-xs md:text-base border ${activeTab === "All" ? "bg-primary text-white shadow-md border-primary" : "bg-white text-slate-700 hover:bg-slate-100 border-slate-200"}`}
-              >
-                All
-              </button>
-              {categories.map(cat => (
+
+              {displayCategories.slice(0, 5).map(cat => (
                 <button 
-                  key={cat.id}
+                  key={cat.id || cat.name}
                   onClick={() => setActiveTab(cat.name)}
                   className={`px-4 py-1.5 md:py-2 rounded-full font-medium transition-all text-xs md:text-base border ${activeTab === cat.name ? "bg-primary text-white shadow-md border-primary" : "bg-white text-slate-700 hover:bg-slate-100 border-slate-200"}`}
                 >
@@ -432,39 +458,48 @@ function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredProducts.map((product, i) => (
+            {filteredProducts.slice(0, 4).map((product, i) => (
               <motion.div 
                 key={product.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-default hover:shadow-xl transition-all group flex flex-col h-full border border-slate-100 cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="bg-white rounded-3xl p-4 border border-slate-100 hover:border-primary/10 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] transition-all group flex flex-col h-full cursor-pointer"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
-                <div className="relative aspect-square overflow-hidden bg-slate-100">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-50 mb-6">
                   <img 
                     src={product.image} 
                     alt={product.name} 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
                   />
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary">
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-[10px] font-black text-primary shadow-sm uppercase tracking-widest">
                     {product.brand}
                   </div>
                 </div>
                 
-                <div className="p-6 flex flex-col flex-grow">
-                  <span className="text-xs text-slate-500 mb-2 uppercase tracking-wider font-semibold">{product.category}</span>
-                  <h3 className="text-xl font-heading font-semibold text-slate-900 mb-2 line-clamp-2">{product.name}</h3>
-                  <div className="text-lg font-semibold text-primary mb-6 mt-auto flex items-center gap-1">
-                    {product.price}
-                  </div>
+                <div className="px-3 flex flex-col flex-grow">
+                  <h3 className="text-sm font-heading font-black text-slate-400 uppercase tracking-[0.2em]">
+                    {typeof product.category === 'object' ? product.category?.name : product.category}
+                  </h3>
+                  <h3 className="text-xl font-heading font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                    {product.name}
+                  </h3>
                   
-                  <button 
-                    onClick={() => openWhatsApp(product.name)}
-                    className="w-full py-3 px-4 bg-[#25D366] hover:bg-[#20b858] text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 mt-auto"
-                  >
-                    <MessageCircle size={18} /> Order on WhatsApp
-                  </button>
+                  <div className="mt-auto">
+                    <div className="text-[13px] font-bold text-primary mb-6 flex items-center gap-3">
+                      <span className="w-6 h-[1.5px] bg-primary/30"></span>
+                      {product.price}
+                    </div>
+                    
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); openWhatsApp(product.name); }}
+                      className="w-full py-4 px-6 bg-slate-900 hover:bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-900/5 hover:shadow-primary/20"
+                    >
+                      <MessageCircle size={18} /> WhatsApp Inquiry
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -478,17 +513,41 @@ function Home() {
         </div>
       </section>
 
-      {/* Brands Section */}
-      <section className="py-16 bg-white border-y border-slate-200 relative z-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-sm uppercase tracking-widest text-slate-400 font-bold mb-8">Trusted Partners & Brands</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {brands.map((brand, i) => (
-              <span key={i} className="text-xl md:text-3xl font-heading font-bold text-slate-300 hover:text-secondary transition-colors duration-300 cursor-default">
-                {brand}
-              </span>
+
+      {/* Brands Section - Marquee Style */}
+      <section className="py-12 bg-white border-y border-slate-100 relative z-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 mb-8 text-center">
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-slate-400 font-black">Our Elite Manufacturing Partners</p>
+        </div>
+        
+        <div className="relative flex overflow-hidden group">
+          <motion.div 
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ 
+              duration: 25, 
+              repeat: Infinity, 
+              ease: "linear" 
+            }}
+            className="flex whitespace-nowrap"
+          >
+            {/* Double the array for seamless infinite scroll */}
+            {[...brands, ...brands].map((brand, i) => (
+              <div 
+                key={i} 
+                className="inline-flex items-center justify-center w-40 md:w-64 h-24 md:h-32 px-8 md:px-12 transition-all duration-500 hover:scale-110"
+              >
+                <img 
+                  src={brand.logo} 
+                  alt={brand.name} 
+                  className="max-w-full max-h-full object-contain pointer-events-none"
+                />
+              </div>
             ))}
-          </div>
+          </motion.div>
+          
+          {/* Gradient Fade Overlays for edges */}
+          <div className="absolute inset-y-0 left-0 w-20 md:w-40 bg-gradient-to-r from-white to-transparent z-10"></div>
+          <div className="absolute inset-y-0 right-0 w-20 md:w-40 bg-gradient-to-l from-white to-transparent z-10"></div>
         </div>
       </section>
 
@@ -497,7 +556,15 @@ function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
-              <h2 className="text-4xl font-heading font-bold text-primary mb-6">Why Choose P.K. Ganesh Tex?</h2>
+              <span className="text-secondary font-bold tracking-[0.4em] uppercase text-[10px] mb-4 block">The P.K. Ganesh Legacy</span>
+              <h2 className="text-4xl md:text-5xl font-heading font-bold text-primary leading-tight relative inline-block mb-10">
+                Why <span className="text-secondary italic relative">
+                  Choose Us?
+                  <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[90%] h-6 text-primary/20" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M0,20 Q50,0 100,20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </h2>
               <p className="text-slate-600 text-lg mb-8 leading-relaxed">
                 As a prominent player in the Madurai textile market, we pride ourselves on delivering uncompromising quality directly to your hands.
               </p>
@@ -533,76 +600,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-24 bg-slate-900 text-white relative z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 mb-16">
-            <div>
-              <h2 className="text-4xl font-heading font-bold text-white mb-6">Visit Our Store</h2>
-              <p className="text-slate-400 text-lg mb-10">We invite you to our showroom to experience the quality firsthand or order directly via WhatsApp.</p>
-              
-              <div className="space-y-8">
-                <div className="flex items-start gap-5">
-                  <div className="bg-slate-800 p-3 rounded-full text-secondary">
-                    <MapPin size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1">Our Address</h4>
-                    <p className="text-slate-300 leading-relaxed max-w-sm">
-                      P.K. Ganesh Tex<br/>
-                      70, East Perumal Maistry Street,<br/>
-                      Vilakkuthoon, Madurai, Tamil Nadu - 625001
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-5">
-                  <div className="bg-slate-800 p-3 rounded-full text-secondary">
-                    <PhoneCall size={28} />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-1">Contact Us</h4>
-                    <p className="text-slate-300 leading-relaxed">
-                      Mobile & WhatsApp: <br/>
-                      <a href={`tel:+${phoneNumber}`} className="text-secondary hover:underline">+91 8072572195</a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden shadow-xl h-[400px] border border-slate-800 bg-slate-800 flex items-center justify-center">
-               <iframe 
-                 title="Google Maps Location"
-                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3930.1264421111!2d78.12211!3d9.919702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b00c582b1189633%3A0xe9f7fcb1d227d!2sEast%20Perumal%20Maistry%20St%2C%20Madurai%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
-                 width="100%" 
-                 height="100%" 
-                 style={{ border: 0 }} 
-                 allowFullScreen="" 
-                 loading="lazy" 
-                 referrerPolicy="no-referrer-when-downgrade"
-               />
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-800 pt-8 text-center text-slate-500 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>&copy; {new Date().getFullYear()} P.K. Ganesh Tex. All rights reserved.</p>
-            <p className="text-sm">Designed carefully keeping tradition in mind.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Floating WhatsApp Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1, type: "spring" }}
-        onClick={() => openWhatsApp()}
-        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#1ebd59] text-white p-4 rounded-full shadow-2xl flex items-center justify-center transform hover:scale-110 transition-all border-4 border-white"
-        aria-label="Order on WhatsApp"
-      >
-        <MessageCircle size={32} />
-      </motion.button>
+      <Footer />
     </div>
   );
 }
